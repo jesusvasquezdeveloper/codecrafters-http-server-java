@@ -33,6 +33,16 @@ public class Main {
        } else if (path.startsWith("/echo/")) {
            String echoWord = path.split("/echo/")[1];
            out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
+
+       } else if (path.equals("/user-agent")) {
+
+           reader.readLine();
+           String userAgent = reader.readLine();
+           userAgent = userAgent.split(" ")[1];
+           userAgent = userAgent.replace("\r\n","");
+
+           out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + userAgent.length() + "\r\n\r\n" + userAgent).getBytes());
+
        } else {
            out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
        }
