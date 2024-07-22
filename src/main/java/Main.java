@@ -1,19 +1,13 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
   public static void main(String[] args) {
-    // You can use print statements as follows for debugging, they'll be visible when running tests.
     System.out.println("Logs from your program will appear here!");
 
-    // Uncomment this block to pass the first stage
 
-     try {
-       ServerSocket serverSocket = new ServerSocket(4221);
+     try(ServerSocket serverSocket = new ServerSocket(4221)) {
        Socket clientSocket;
 
        // Since the tester restarts your program quite often, setting SO_REUSEADDR
@@ -21,19 +15,30 @@ public class Main {
        serverSocket.setReuseAddress(true);
 
        clientSocket = serverSocket.accept(); // Wait for connection from client.
-
        System.out.println("accepted new connection");
+
+
        InputStream input = clientSocket.getInputStream();
        BufferedReader reader = new BufferedReader(new InputStreamReader(input));
        String line = reader.readLine();
        System.out.println(line);
        String[] httpRequest = line.split(" ", 0);
 
-       if (httpRequest[1].equals("/")) {
-           clientSocket.getOutputStream().write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+       String path = httpRequest[1];
+
+         OutputStream out = clientSocket.getOutputStream();
+
+       if (path.equals("/")) {
+           out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
+       } else if (path.startsWith("/echo/")) {
+           String echoWord = path.split("/echo/")[1];
+           out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
        } else {
-           clientSocket.getOutputStream().write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+           out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
        }
+       out.flush();
+       out.close();
+       clientSocket.close();
 
      } catch (IOException e) {
        System.out.println("IOException: " + e.getMessage());
