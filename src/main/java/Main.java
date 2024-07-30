@@ -18,7 +18,7 @@ public class Main {
 
            clientSocket = serverSocket.accept();
 
-           new RequestHandler(clientSocket).start();// Wait for connection from client.
+           new RequestHandler(clientSocket, args).start();// Wait for connection from client.
 
        }
 
