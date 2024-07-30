@@ -39,11 +39,14 @@ public class RequestHandler extends Thread {
                 String finalFile = directory + file;
 
                 StringBuilder stringBuilder = new StringBuilder();
-                String line;
                 try (BufferedReader reader = new BufferedReader(new FileReader(finalFile))) {
+
+                    String line = reader.readLine();
+                    stringBuilder.append(line);
+
                     while((line = reader.readLine()) != null) {
-                        stringBuilder.append(line);
                         stringBuilder.append("\n");
+                        stringBuilder.append(line);
                     }
 
                     out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length:" + stringBuilder.length() + "\r\n\r\n" + stringBuilder).getBytes());
