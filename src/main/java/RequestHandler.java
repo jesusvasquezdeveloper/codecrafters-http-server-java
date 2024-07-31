@@ -80,27 +80,25 @@ public class RequestHandler extends Thread {
     public HttpRequest request(Socket socket)  {
 
         try {
-            Scanner scanner = new Scanner(socket.getInputStream());
+            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            String[] headerLine = scanner.nextLine().split(" ");
+            String[] firstLine = bufferedReader.readLine().split(" ");
 
-            String method = headerLine[0];
-            String path = headerLine[1];
+            String method = firstLine[0];
+            String path = firstLine[1];
 
             HttpRequest request = new HttpRequest(path);
             request.setMethod(method);
 
             String line;
-            while (!(line = scanner.nextLine()).isEmpty()) {
+            while ((line = bufferedReader.readLine()) != null && !line.isEmpty()) {
                 String[] header = line.split(": ");
                 request.addHeader(header[0], header[1]);
             }
 
             StringBuilder body = new StringBuilder();
-            String character;
-            while(scanner.hasNext()) {
-                character = scanner.next();
-                body.append(character);
+            while(bufferedReader.ready()) {
+                body.append((char)bufferedReader.read());
             }
 
             request.setBody(body.toString());
