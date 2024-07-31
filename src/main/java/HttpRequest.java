@@ -8,6 +8,7 @@ public class HttpRequest {
     private String path;
     private Map<String, String> headers;
     private String body;
+    private String method;
 
     public String getPath() {
         return path;
@@ -30,5 +31,13 @@ public class HttpRequest {
     }
     public void setBody(String body) {
         this.body = body;
+    }
+
+    public String getMethod() {
+        return method;
+    }
+
+    public void setMethod(String method) {
+        this.method = method;
     }
 }

@@ -35,26 +35,37 @@ public class RequestHandler extends Thread {
 
                 String directory = args[1];
                 String file = path.split("/files/")[1];
-
                 String finalFile = directory + file;
 
-                StringBuilder stringBuilder = new StringBuilder();
-                try (BufferedReader reader = new BufferedReader(new FileReader(finalFile))) {
-
-                    String line = reader.readLine();
-                    stringBuilder.append(line);
-
-                    while((line = reader.readLine()) != null) {
-                        stringBuilder.append("\n");
-                        stringBuilder.append(line);
+                if ("POST".equals(request.getMethod())) {
+                    try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(finalFile))) {
+                        bufferedWriter.write(request.getBody());
+                        bufferedWriter.flush();
                     }
 
-                    out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length:" + stringBuilder.length() + "\r\n\r\n" + stringBuilder).getBytes());
+                    out.write("HTTP/1.1 201 Created\r\n\r\n".getBytes());
 
-                } catch (FileNotFoundException e) {
-                    out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
                 }
+                else {
 
+                    StringBuilder stringBuilder = new StringBuilder();
+                    try (BufferedReader reader = new BufferedReader(new FileReader(finalFile))) {
+
+                        String line = reader.readLine();
+                        stringBuilder.append(line);
+
+                        while((line = reader.readLine()) != null) {
+                            stringBuilder.append("\n");
+                            stringBuilder.append(line);
+                        }
+
+                        out.write(("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length:" + stringBuilder.length() + "\r\n\r\n" + stringBuilder).getBytes());
+
+                    } catch (FileNotFoundException e) {
+                        out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
+                    }
+
+                }
             } else {
                 out.write("HTTP/1.1 404 Not Found\r\n\r\n".getBytes());
             }
@@ -73,15 +84,26 @@ public class RequestHandler extends Thread {
 
             String[] headerLine = scanner.nextLine().split(" ");
 
+            String method = headerLine[0];
             String path = headerLine[1];
 
             HttpRequest request = new HttpRequest(path);
+            request.setMethod(method);
 
             String line;
             while (!(line = scanner.nextLine()).isEmpty()) {
                 String[] header = line.split(": ");
                 request.addHeader(header[0], header[1]);
             }
+
+            StringBuilder body = new StringBuilder();
+            String character;
+            while(scanner.hasNext()) {
+                character = scanner.next();
+                body.append(character);
+            }
+
+            request.setBody(body.toString());
 
             return request;
         } catch (IOException e) {
