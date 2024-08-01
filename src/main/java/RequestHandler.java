@@ -41,7 +41,7 @@ public class RequestHandler extends Thread {
                     encodingHeader.append("Content-Encoding: gzip\r\n");
                     byte[] gzipData = compressString(echoWord);
 
-                    out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n").getBytes("UTF-8"));
+                    out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + gzipData.length + "\r\n\r\n").getBytes(StandardCharsets.UTF_8));
                     out.write(gzipData);
                 } else {
                     out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
@@ -135,5 +135,4 @@ public class RequestHandler extends Thread {
         }
         return outputStream.toByteArray();
     }
-
 }
