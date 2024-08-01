@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.zip.GZIPOutputStream;
 
@@ -38,11 +39,19 @@ public class RequestHandler extends Thread {
 
                 if (encodings.contains("gzip")) {
                     encodingHeader.append("Content-Encoding: gzip\r\n");
-                    out = new GZIPOutputStream(out);
+                    ByteArrayOutputStream byteArrayOutputStream =
+                            new ByteArrayOutputStream();
+                    try (GZIPOutputStream gzipOutputStream =
+                                 new GZIPOutputStream(byteArrayOutputStream)) {
+                        gzipOutputStream.write(echoWord.getBytes(StandardCharsets.UTF_8));
+                    }
+                    byte[] gzipData = byteArrayOutputStream.toByteArray();
+
+                    out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n").getBytes());
+                    out.write(gzipData);
+                } else {
+                    out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
                 }
-
-                out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
-
             } else if (path.equals("/user-agent")) {
                 String userAgent = request.getHeader("User-Agent");
                 out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + userAgent.length() + "\r\n\r\n" + userAgent).getBytes());
