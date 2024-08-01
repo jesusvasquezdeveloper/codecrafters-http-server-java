@@ -1,15 +1,20 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class RequestHandler extends Thread {
 
     private Socket socket;
     private String[] args;
+    private List<String> supportedEncodings;
 
     public RequestHandler(Socket socket, String[] args) {
         this.socket = socket;
         this.args = args;
+        this.supportedEncodings = new ArrayList<>();
+        this.supportedEncodings.add("gzip");
     }
 
     @Override
@@ -24,8 +29,12 @@ public class RequestHandler extends Thread {
             if (path.equals("/")) {
                 out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
             } else if (path.startsWith("/echo/")) {
+                StringBuilder encodingHeader = new StringBuilder();
+                if (supportedEncodings.contains(request.getHeader("Accept-Encoding"))) {
+                    encodingHeader.append("Content-Encoding: gzip\r\n");
+                }
                 String echoWord = path.split("/echo/")[1];
-                out.write(("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
+                out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
 
             } else if (path.equals("/user-agent")) {
                 String userAgent = request.getHeader("User-Agent");
@@ -108,4 +117,5 @@ public class RequestHandler extends Thread {
             throw new RuntimeException(e);
         }
     }
+
 }
