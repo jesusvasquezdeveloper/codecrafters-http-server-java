@@ -31,7 +31,10 @@ public class RequestHandler extends Thread {
                 out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
             } else if (path.startsWith("/echo/")) {
                 StringBuilder encodingHeader = new StringBuilder();
-                List<String> encodings = Arrays.stream(request.getHeader("Accept-Encoding").split(",")).toList();
+                List<String> encodings = Arrays.stream(request.getHeader("Accept-Encoding").split(","))
+                    .map(String::trim)
+                    .toList();
+
                 if (encodings.contains("gzip")) {
                     encodingHeader.append("Content-Encoding: gzip\r\n");
                 }
