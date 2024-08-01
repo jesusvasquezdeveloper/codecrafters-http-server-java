@@ -30,7 +30,8 @@ public class RequestHandler extends Thread {
                 StringBuilder encodingHeader = new StringBuilder();
                 Optional<String> acceptEncoding = Optional.ofNullable(request.getHeader("Accept-Encoding"));
 
-                List<String> encodings = acceptEncoding.map(value -> Arrays.stream(value.split(",")).toList())
+                List<String> encodings = acceptEncoding.map(value -> Arrays.stream(value.split(","))
+                    .map(String::trim).toList())
                     .orElse(new ArrayList<>());
 
                 if (encodings.contains("gzip")) {
