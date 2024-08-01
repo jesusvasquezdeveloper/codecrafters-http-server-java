@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -30,9 +31,11 @@ public class RequestHandler extends Thread {
                 out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
             } else if (path.startsWith("/echo/")) {
                 StringBuilder encodingHeader = new StringBuilder();
-                if (supportedEncodings.contains(request.getHeader("Accept-Encoding"))) {
+                List<String> encodings = Arrays.stream(request.getHeader("Accept-Encoding").split(",")).toList();
+                if (encodings.contains("gzip")) {
                     encodingHeader.append("Content-Encoding: gzip\r\n");
                 }
+
                 String echoWord = path.split("/echo/")[1];
                 out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
 
