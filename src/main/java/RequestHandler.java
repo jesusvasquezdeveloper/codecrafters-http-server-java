@@ -1,6 +1,7 @@
 import java.io.*;
 import java.net.Socket;
 import java.util.*;
+import java.util.zip.GZIPOutputStream;
 
 public class RequestHandler extends Thread {
 
@@ -27,6 +28,7 @@ public class RequestHandler extends Thread {
             if (path.equals("/")) {
                 out.write("HTTP/1.1 200 OK\r\n\r\n".getBytes());
             } else if (path.startsWith("/echo/")) {
+                String echoWord = path.split("/echo/")[1];
                 StringBuilder encodingHeader = new StringBuilder();
                 Optional<String> acceptEncoding = Optional.ofNullable(request.getHeader("Accept-Encoding"));
 
@@ -36,9 +38,9 @@ public class RequestHandler extends Thread {
 
                 if (encodings.contains("gzip")) {
                     encodingHeader.append("Content-Encoding: gzip\r\n");
+                    out = new GZIPOutputStream(out);
                 }
 
-                String echoWord = path.split("/echo/")[1];
                 out.write(("HTTP/1.1 200 OK\r\n" + encodingHeader + "Content-Type: text/plain\r\nContent-Length:" + echoWord.length() + "\r\n\r\n" + echoWord).getBytes());
 
             } else if (path.equals("/user-agent")) {
